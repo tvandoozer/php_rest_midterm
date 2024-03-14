@@ -7,6 +7,7 @@
     // Properties
     public $id;
     public $category;
+    public $where;
 
     // Constructor with DB
     public function __construct($db) {
@@ -41,15 +42,19 @@
           category
         FROM
           ' . $this->table . ' 
-        WHERE
-          id = ?
+        WHERE '
+        . $this->where . '
         LIMIT 1';
       
       // Prepare statement
       $stmt = $this->conn->prepare($query);
 
       // Bind ID
-      $stmt->bindParam(1, $this->id);
+      if ($this->where === 'id = :id') {
+        $stmt->bindParam(':id', $this->id);
+      } elseif ($this->where === 'category = :category') {
+        $stmt->bindParam(':category', $this->category);
+      }
 
       // Execute query
       $stmt->execute();

@@ -17,16 +17,36 @@
 
   // Get raw posted data
   $data = json_decode(file_get_contents("php://input"));
+  
+  // Check if missing author parameter
+  if (isset($data->author)) {
+  
+    $author->author = $data->author;
+    $author->where = 'author = :author';
+  
+    // Create author
+    if($author->create()) {
+      // Get author
+      $result = $author->read_single();
 
-  $author->author = $data->author;
+      while($row = $result->fetch(PDO::FETCH_ASSOC)) {
+        extract($row);
 
-  // Create author
-  if($author->create()) {
-    echo json_encode(
-      array('message' => 'Author Created')
-    );
+        // Create array
+        $author_arr = array(
+          'id' => $id,
+          'author' => $author
+        );
+      }   
+      // Make JSON
+      echo json_encode($author_arr);  
+    } else {
+      echo json_encode(
+        array('message' => 'Author Not Created')
+      );
+    }
   } else {
     echo json_encode(
-      array('message' => 'Author Not Created')
+      array('message' => 'Missing Required Parameters')
     );
   }

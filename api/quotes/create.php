@@ -18,17 +18,67 @@
   // Get raw posted data
   $data = json_decode(file_get_contents("php://input"));
 
-  $quote->quote = $data->quote;
-  $quote->author_id = $data->author_id;
-  $quote->category_id = $data->category_id;
+  // Check if missing any parameters
+  if (isset($data->quote) && isset($data->author_id) && isset($data->category_id)) {
+  
+    $quote->quote = $data->quote;
+    $quote->author_id = $data->author_id;
+    $quote->where = 'author_id = :author_id';
+    // Get author
+    $result = $quote->read_single();
+    // Get row count
+    $num = $result->rowCount();
 
-  // Create quote
-  if($quote->create()) {
-    echo json_encode(
-      array('message' => 'Quote Created')
-    );
+    // Check if any authors
+    if($num == 0) {
+      echo json_encode(
+        array('message' => 'author_id Not Found')
+      );
+    } else {
+      $quote->category_id = $data->category_id;
+      $quote->where = 'category_id = :category_id';
+      // Get category
+      $result = $quote->read_single();
+      // Get row count
+      $num = $result->rowCount();
+
+      // Check if any categories
+      if($num == 0) {
+        echo json_encode(
+          array('message' => 'category_id Not Found')
+        );
+      } else {
+        $quote->quote = $data->quote;
+        $quote->author_id = $data->author_id;
+        $quote->category_id = $data->category_id;
+        $quote->where = '(quote = :quote AND author_id = :author_id AND category_id = :category_id)';
+
+        // Create quote
+        if($quote->create()) {
+          $new_quote_result = $quote->read_single();
+
+          // quote array
+          while($row = $new_quote_result->fetch(PDO::FETCH_ASSOC)) {
+            extract($row);
+
+            $new_quote = array(
+              'id' => $id,
+              'quote' => $quote,
+              'author_id' => $data->author_id,
+              'category_id' => $data->category_id,
+            );    
+          }
+          // Turn to JSON & output
+            echo json_encode($new_quote);          
+        } else {
+          echo json_encode(
+            array('message' => 'Quote Not Created')
+          );
+        }
+      }
+    }      
   } else {
     echo json_encode(
-      array('message' => 'Quote Not Created')
+      array('message' => 'Missing Required Parameters')
     );
   }

@@ -20,14 +20,26 @@
 
   // Set ID to update
   $author->id = $data->id;
+  $author->where = 'id = :id';
+  // Get ID
+  $result = $author->read_single();
+  // Get row count
+  $num = $result->rowCount();
 
-  // Delete author
-  if($author->delete()) {
+  // Check if ID exists
+  if($num == 0) {
     echo json_encode(
-      array('message' => 'Author Deleted')
+      array('message' => 'author_id Not Found')
     );
   } else {
-    echo json_encode(
-      array('message' => 'Author Not Deleted')
-    );
+    // Delete author
+    if($author->delete()) {
+      echo json_encode(
+        array('id' => $data->id)
+      );
+    } else {
+      echo json_encode(
+        array('message' => 'Author Not Deleted')
+      );
+    }
   }

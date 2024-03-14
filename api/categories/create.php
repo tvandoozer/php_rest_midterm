@@ -17,16 +17,36 @@
 
   // Get raw posted data
   $data = json_decode(file_get_contents("php://input"));
+  
+  // Check if missing category parameter
+  if (isset($data->category)) {
+  
+    $category->category = $data->category;
+    $category->where = 'category = :category';
+  
+    // Create category
+    if($category->create()) {
+      // Get category
+      $result = $category->read_single();
 
-  $category->category = $data->category;
+      while($row = $result->fetch(PDO::FETCH_ASSOC)) {
+        extract($row);
 
-  // Create category
-  if($category->create()) {
-    echo json_encode(
-      array('message' => 'Category Created')
-    );
+        // Create array
+        $cat_arr = array(
+          'id' => $id,
+          'category' => $category
+        );
+      }   
+      // Make JSON
+      echo json_encode($cat_arr);      
+    } else {
+      echo json_encode(
+        array('message' => 'Category Not Created')
+      );
+    }
   } else {
     echo json_encode(
-      array('message' => 'Category Not Created')
+      array('message' => 'Missing Required Parameters')
     );
   }

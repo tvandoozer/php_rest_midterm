@@ -12,23 +12,54 @@
   $database = new Database();
   $db = $database->connect();
 
-  // Instantiate author object
+  // Instantiate Author object
   $author = new Author($db);
 
   // Get raw posted data
   $data = json_decode(file_get_contents("php://input"));
 
-  // Set ID to update
-  $author->id = $data->id;
-  $author->author = $data->author;
+  // Check if missing author parameter
+  if (isset($data->id) && isset($data->author)) {
+    // Set ID to update
+    $author->author = $data->author;
+    $author->id = $data->id;
+    $author->where = 'id = :id';
+    // Get ID
+    $result = $author->read_single();
+    // Get row count
+    $num = $result->rowCount();
 
-  // Update author
-  if($author->update()) {
-    echo json_encode(
-      array('message' => 'Author Updated')
-    );
+    // Check if ID exists
+    if($num == 0) {
+      echo json_encode(
+        array('message' => 'author_id Not Found')
+      );
+    } else {
+      // Update author
+      if($author->update()) {
+        // Get author
+        $result = $author->read_single();
+
+        while($row = $result->fetch(PDO::FETCH_ASSOC)) {
+          extract($row);
+
+          // Create array
+          $author_arr = array(
+            'id' => $id,
+            'author' => $author
+          );
+        }   
+        // Make JSON
+        echo json_encode($author_arr);
+      } else {
+        echo json_encode(
+          array('message' => 'Author Not Updated')
+        );
+      }
+    }
+  
   } else {
     echo json_encode(
-      array('message' => 'Author Not Updated')
+      array('message' => 'Missing Required Parameters')
     );
   }

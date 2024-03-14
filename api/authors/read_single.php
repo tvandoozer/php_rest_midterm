@@ -14,7 +14,11 @@
   $author = new Author($db);
 
   // Get ID
-  $author->id = isset($_GET['id']) ? $_GET['id'] : die();
+  // $author->id = isset($_GET['id']) ? $_GET['id'] : die();
+  if (isset($_GET['id'])) {
+    $author->id = $_GET['id'];
+    $author->where = 'id = :id';
+  }
 
   // Get author
   $result = $author->read_single();

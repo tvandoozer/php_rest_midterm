@@ -14,7 +14,11 @@
   $category = new Category($db);
 
   // Get ID
-  $category->id = isset($_GET['id']) ? $_GET['id'] : die();
+  // $category->id = isset($_GET['id']) ? $_GET['id'] : die();
+  if (isset($_GET['id'])) {
+    $category->id = $_GET['id'];
+    $category->where = 'id = :id';
+  }
 
   // Get category
   $result = $category->read_single();
@@ -31,7 +35,7 @@
     // Create array
     $cat_arr = array(
       'id' => $category->id,
-      'category' => $category->category,
+      'category' => $category->category
     );
   
     // Make JSON

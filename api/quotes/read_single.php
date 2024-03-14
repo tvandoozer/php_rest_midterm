@@ -40,7 +40,6 @@
   if($num > 0) {
     // quote array
     $quote_arr = array();
-    $quote_arr['data'] = array();
 
     while($row = $result->fetch(PDO::FETCH_ASSOC)) {
       extract($row);
@@ -53,11 +52,17 @@
       );
 
       // Push to "data"
-      array_push($quote_arr['data'], $quote_item);    
+      if ($num > 1) {
+        array_push($quote_arr, $quote_item);    
+      }
     }
 
     // Turn to JSON & output
-    echo json_encode($quote_arr);
+    if ($num > 1) {
+      echo json_encode($quote_arr);
+    } else {
+      echo json_encode($quote_item);
+    }
 
   } else {
     // No Quotes

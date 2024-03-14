@@ -20,14 +20,26 @@
 
   // Set ID to update
   $quote->id = $data->id;
+  $quote->where = 'quotes.id = :id';
+  // Get ID
+  $result = $quote->read_single();
+  // Get row count
+  $num = $result->rowCount();
 
-  // Delete quote
-  if($quote->delete()) {
+  // Check if ID exists
+  if($num == 0) {
     echo json_encode(
-      array('message' => 'Quote Deleted')
+      array('message' => 'No Quotes Found')
     );
   } else {
-    echo json_encode(
-      array('message' => 'Quote Not Deleted')
-    );
+    // Delete quote
+    if($quote->delete()) {
+      echo json_encode(
+        array('id' => $data->id)
+      );
+    } else {
+      echo json_encode(
+        array('message' => 'Quote Not Deleted')
+      );
+    }
   }

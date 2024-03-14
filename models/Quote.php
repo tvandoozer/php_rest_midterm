@@ -60,7 +60,11 @@
         $stmt->bindParam(':author_id', $this->author_id);
       } elseif ($this->where === 'category_id = :category_id') {
         $stmt->bindParam(':category_id', $this->category_id);
-      } else {
+      } elseif ($this->where === '(author_id = :author_id AND category_id = :category_id)') {
+        $stmt->bindParam(':author_id', $this->author_id);
+        $stmt->bindParam(':category_id', $this->category_id);
+      } elseif ($this->where === '(quote = :quote AND author_id = :author_id AND category_id = :category_id)') {
+        $stmt->bindParam(':quote', $this->quote);
         $stmt->bindParam(':author_id', $this->author_id);
         $stmt->bindParam(':category_id', $this->category_id);
       }

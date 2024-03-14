@@ -20,14 +20,26 @@
 
   // Set ID to update
   $category->id = $data->id;
+  $category->where = 'id = :id';
+  // Get ID
+  $result = $category->read_single();
+  // Get row count
+  $num = $result->rowCount();
 
-  // Delete category
-  if($category->delete()) {
+  // Check if ID exists
+  if($num == 0) {
     echo json_encode(
-      array('message' => 'Category Deleted')
+      array('message' => 'category_id Not Found')
     );
   } else {
-    echo json_encode(
-      array('message' => 'Category Not Deleted')
-    );
+    // Delete category
+    if($category->delete()) {
+      echo json_encode(
+        array('id' => $data->id)
+      );
+    } else {
+      echo json_encode(
+        array('message' => 'Category Not Deleted')
+      );
+    }
   }
